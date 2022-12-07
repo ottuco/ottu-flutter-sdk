@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> implements PaymentDelegate {
         context,
         'session_id',
         'api_key',
+        'merchant_Id',
         this,
         sdkLanguage: lan,
       );

@@ -38,8 +38,10 @@ class NetworkUtils {
     String sdkLanguage = 'en',
     String methodType = '1',
     String apikey = '',
+    String merchantId = '',
   }) async {
     token = apikey;
+    merchantid = merchantId;
     if (!Platform.isIOS) {
       bool isSecure = await NotSecureDevice().checkSecureDevice(context!);
       if (isSecure) return;
@@ -238,7 +240,12 @@ class NetworkUtils {
         'Content-Type': 'application/json',
       },
     ).then((http.Response response) {
-      var res = _decoder.convert(response.body);
+      var res = {};
+      try {
+        res = _decoder.convert(response.body);
+      } catch (e) {
+        log(e.toString());
+      }
       if (kDebugMode) {
         print(res);
       }

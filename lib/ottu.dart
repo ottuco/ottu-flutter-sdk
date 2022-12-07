@@ -10,6 +10,7 @@ class Ottu {
     BuildContext context,
     String sessionId,
     String apiKey,
+    String merchantid,
     PaymentDelegate paymentDelegate, {
 
     /// It is optional. It takes default language en.
@@ -23,6 +24,7 @@ class Ottu {
         paymentDelegate: paymentDelegate,
         sdkLanguage: sdkLanguage!,
         apikey: apiKey,
+        merchantId: merchantid,
       );
     } catch (e) {
       throw Exception(e);
