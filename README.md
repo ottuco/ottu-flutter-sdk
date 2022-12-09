@@ -56,8 +56,8 @@ class _HomeScreenState extends State<HomeScreen> implements PaymentDelegate {
 
  void makePayment() async {
     try {
-    //add context,sessionid,api_key,paymentDelegate's object and language(ENTER_LANGUAGE_ID_en_or_ar)
-      await ottu.open(context, "sessionid","api_key",'merchant_Id', this, sdkLanguage: "language");
+    //add context,sessionid,API_KEY,MERCHANT_ID,paymentDelegate's object and language(ENTER_LANGUAGE_ID_en_or_ar)
+      await ottu.open(context, "sessionid","API_KEY",'MERCHANT_ID', this, sdkLanguage: "language");
     } catch (e) {
     //catch errors
     }
