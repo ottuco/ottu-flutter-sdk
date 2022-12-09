@@ -31,7 +31,7 @@ The ottu requires Flutter >=2.0 or above is compatible with android and iOS.
 ## Getting started
 
 To initialize the SDK you need to create session token. 
-You can create session token with our public API [Click here](https://app.apiary.io/iossdk2/editor) to see more detail about our public API.
+You can create session token with our public API [Click here](https://app.apiary.io/iossdk2/editor) to see more detail about our public API. Also, please relace the domain with the merchant id in the public API.
     
 Installation
 ==========================
