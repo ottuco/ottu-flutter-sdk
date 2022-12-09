@@ -14,7 +14,7 @@ class Ottu {
     PaymentDelegate paymentDelegate, {
 
     /// It is optional. It takes default language en.
-    String? sdkLanguage,
+    String? lang,
   }) async {
     try {
       await NetworkUtils.fetchPaymentTransaction(
@@ -22,7 +22,7 @@ class Ottu {
         openScreen: (e) {},
         context: context,
         paymentDelegate: paymentDelegate,
-        sdkLanguage: sdkLanguage!,
+        sdkLanguage: lang!,
         apikey: apiKey,
         merchantId: merchantid,
       );

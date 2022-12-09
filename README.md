@@ -31,7 +31,7 @@ The ottu requires Flutter >=2.0 or above is compatible with android and iOS.
 ## Getting started
 
 To initialize the SDK you need to create session token. 
-You can create session token with our public API [Click here](https://app.apiary.io/iossdk2/editor) to see more detail about our public API. Also, please relace the domain with the merchant id in the public API.
+You can create session token with our public API [Click here](https://app.apiary.io/iossdk2/editor) to see more detail about our public API.
     
 Installation
 ==========================
@@ -56,8 +56,8 @@ class _HomeScreenState extends State<HomeScreen> implements PaymentDelegate {
 
  void makePayment() async {
     try {
-    //add context,sessionid,API_KEY,MERCHANT_ID,paymentDelegate's object and language(ENTER_LANGUAGE_ID_en_or_ar)
-      await ottu.open(context, "sessionid","API_KEY",'MERCHANT_ID', this, sdkLanguage: "language");
+    //add context,session_id,API_KEY,MERCHANT_ID,paymentDelegate's object and language(ENTER_LANGUAGE_ID_en_or_ar)
+      await ottu.open(context, "session_id","API_KEY",'MERCHANT_ID', this, lang: "language");
     } catch (e) {
     //catch errors
     }

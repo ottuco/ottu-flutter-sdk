@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> implements PaymentDelegate {
         'API_KEY',
         'MERCHANT_ID',
         this,
-        sdkLanguage: lan,
+        lang: lan,
       );
     } catch (e) {
       rethrow;
