@@ -137,6 +137,9 @@ class _CardTileState extends State<CardTile> {
                           enabled: isEnabled,
                           controller: widget.nameOnCardController,
                           cursorColor: primaryColor,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                          ),
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.all(10),
                             hintText: S.of(context).NameOnCard,
@@ -187,6 +190,9 @@ class _CardTileState extends State<CardTile> {
                           enabled: isEnabled,
                           cursorColor: primaryColor,
                           keyboardType: TextInputType.number,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                          ),
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(19),

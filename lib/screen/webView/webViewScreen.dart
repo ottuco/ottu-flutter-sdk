@@ -1,8 +1,8 @@
 // ignore_for_file: file_names
 
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ottu/consts/colors.dart';
 import 'package:ottu/screen/webView/utils/webviewfunctions.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -27,6 +27,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: whiteColor,
+        iconTheme: const IconThemeData(
+          color: Colors.black, //change your color here
+        ),
+      ),
       body: SafeArea(
         child: WebView(
           javascriptMode: JavascriptMode.unrestricted,

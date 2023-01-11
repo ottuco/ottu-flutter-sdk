@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:ottu/Networkutils/networkUtils.dart';
-import 'package:ottu/models/paymentStatus.dart';
 import 'package:web_socket_channel/io.dart';
 import '../../../consts/consts.dart';
 
@@ -33,13 +32,13 @@ class WebViewWithSocketScreenFunction {
     var res = _decoder.convert(response);
 
     if (res['status'] == 'canceled') {
-      NetworkUtils.paymentDelegates!.cancelCallback(res.toString());
+      NetworkUtils.paymentDelegates!.cancelCallback(jsonEncode(res));
       Navigator.of(context).pop();
       Navigator.popUntil(
           context, (Route<dynamic> predicate) => predicate.isFirst);
       // Dialogs().showFailDialog(context);
     } else if (res['status'] == 'success') {
-      NetworkUtils.paymentDelegates!.successCallback(res.toString());
+      NetworkUtils.paymentDelegates!.successCallback(jsonEncode(res));
       Navigator.of(context).pop();
       Navigator.popUntil(
           context, (Route<dynamic> predicate) => predicate.isFirst);

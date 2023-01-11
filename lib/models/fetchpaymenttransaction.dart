@@ -32,10 +32,12 @@ class FetchPaymentTransaction {
     this.webhookUrl,
     this.applePayAvailable,
     this.publicKeyUrl,
+    this.responseConfig,
   });
 
   String? amount;
   ApplePayConfig? applePayConfig;
+  ResponseConfig? responseConfig;
   dynamic attachment;
   List<Card>? cards;
   dynamic checkoutShortUrl;
@@ -79,6 +81,11 @@ class FetchPaymentTransaction {
             : List<Card>.from(json["cards"].map((x) => Card.fromJson(x))),
         checkoutShortUrl: json["checkout_short_url"],
         checkoutUrl: json["checkout_url"],
+        responseConfig: json['response'] == null
+            ? ResponseConfig()
+            : ResponseConfig.fromJson(
+                json['response'],
+              ),
         currencyCode: json["currency_code"],
         cansavecard: json['can_save_card'],
         customerEmail: json["customer_email"],
@@ -142,6 +149,45 @@ class ApplePayConfig {
         validationUrl: json["validation_url"] ?? '',
         paymentUrl: json["payment_url"] ?? '',
       );
+}
+
+class ResponseConfig {
+  ResponseConfig({
+    this.status,
+    this.session_id,
+    this.message,
+    this.order_no,
+    this.operation,
+    this.reference_number,
+    this.redirect_url,
+  });
+
+  String? status;
+  String? session_id;
+  String? message;
+  String? order_no;
+  String? operation;
+  String? reference_number;
+  String? redirect_url;
+
+  factory ResponseConfig.fromJson(Map<String, dynamic> json) => ResponseConfig(
+        status: json["status"] ?? '',
+        session_id: json["session_id"] ?? '',
+        message: json["message"] ?? '',
+        order_no: json["order_no"] ?? '',
+        operation: json["operation"] ?? '',
+        reference_number: json["reference_number"] ?? '',
+        redirect_url: json["redirect_url"] ?? '',
+      );
+  Map<String, dynamic> toJson() => {
+        "status": status,
+        "session_id": session_id,
+        "message": message,
+        "order_no": order_no,
+        "operation": operation,
+        "reference_number": reference_number,
+        "redirect_url": redirect_url,
+      };
 }
 
 class Card {

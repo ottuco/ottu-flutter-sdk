@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:ottu/Networkutils/networkUtils.dart';
+import 'package:ottu/consts/colors.dart';
 import 'package:ottu/consts/htmlString.dart';
 import 'package:ottu/models/3DSResponse.dart';
 import 'package:ottu/screen/3DS/utils/functions.dart';
@@ -46,6 +47,12 @@ class _WebViewWithSocketScreenState extends State<WebViewWithSocketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: whiteColor,
+        iconTheme: const IconThemeData(
+          color: Colors.black, //change your color here
+        ),
+      ),
       body: SafeArea(
           child: WebView(
         zoomEnabled: true,

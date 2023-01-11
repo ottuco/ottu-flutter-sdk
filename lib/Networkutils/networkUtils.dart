@@ -56,11 +56,10 @@ class NetworkUtils {
     }
     return await http.get(
       Uri.parse(
-        BASEURL +
-            'checkout/api/sdk/v1/pymt-txn/submit/$sessionId?enableCHD=true',
+        '${BASEURL}checkout/api/sdk/v1/pymt-txn/submit/$sessionId?enableCHD=true',
       ),
       headers: {
-        'Authorization': 'Api-Key ' + token,
+        'Authorization': 'Api-Key $token',
         'Content-Type': 'application/json',
       },
     ).then((http.Response response) async {
@@ -100,7 +99,7 @@ class NetworkUtils {
     return await http.delete(
       Uri.parse(deleteurl),
       headers: {
-        'Authorization': 'Api-Key ' + token,
+        'Authorization': 'Api-Key $token',
       },
     ).then((http.Response response) {
       var statusCode = response.statusCode;
@@ -180,7 +179,7 @@ class NetworkUtils {
         .post(
       Uri.parse(submitURL),
       headers: {
-        'Authorization': 'Api-Key ' + token,
+        'Authorization': 'Api-Key $token',
         'Content-Type': 'application/json',
       },
       body: paymentDetails,
@@ -201,7 +200,7 @@ class NetworkUtils {
           Navigator.of(context).pop();
         } else if (status == '3DS') {
           threeDSResponse = ThreeDsResponse.fromJson(res);
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (ctx) => WebViewWithSocketScreen(
                 threeDsResponse: threeDSResponse,
@@ -219,7 +218,7 @@ class NetworkUtils {
     return await http.get(
       Uri.parse(url),
       headers: {
-        'Authorization': 'Api-Key ' + token,
+        'Authorization': 'Api-Key $token',
       },
     );
   }
@@ -236,7 +235,7 @@ class NetworkUtils {
       Uri.parse(redirecUrl),
       body: urlDetails,
       headers: {
-        'Authorization': 'Api-Key ' + token,
+        'Authorization': 'Api-Key $token',
         'Content-Type': 'application/json',
       },
     ).then((http.Response response) {
@@ -278,7 +277,7 @@ class NetworkUtils {
         .post(
       Uri.parse(url),
       headers: {
-        'Authorization': 'Api-Key ' + token,
+        'Authorization': 'Api-Key $token',
         'Content-Type': 'application/json',
       },
       body: json.encode({
@@ -294,18 +293,24 @@ class NetworkUtils {
         var data = await ApplePay().pay(
             amount, merchantIdentifier, currencycode, countryCode, context);
         var res = json.decode(data);
-        applePayPaymentUrl(paymentURL, context, currencycode, amount, res);
+        applePayPaymentUrl(
+            paymentURL, context, currencycode, amount, res, merchantIdentifier);
       }
     });
   }
 
-  static Future applePayPaymentUrl(String url, BuildContext context,
-      String currencycode, String amount, dynamic paymentdata) async {
+  static Future applePayPaymentUrl(
+      String url,
+      BuildContext context,
+      String currencycode,
+      String amount,
+      dynamic paymentdata,
+      String merchant_id) async {
     String tid = paymentdata['header']['transactionId'];
     return http
         .post(Uri.parse(url),
             headers: {
-              'Authorization': 'Api-Key ' + token,
+              'Authorization': 'Api-Key $token',
               'Content-Type': 'application/json',
             },
             body: json.encode({
@@ -318,7 +323,7 @@ class NetworkUtils {
                   "token": {
                     "paymentData": paymentdata,
                     "paymentMethod": {
-                      "displayName": "merchant.dev.ottu.ksa",
+                      "displayName": merchant_id,
                       "network": "network",
                       "type": "apple-pay"
                     },
@@ -327,17 +332,28 @@ class NetworkUtils {
                 }
               }
             }))
-        .then((value) {
-      var response = json.decode(value.body);
+        .then((value) async {
       var responeStatuscode = value.statusCode;
       if (responeStatuscode == 200) {
-        if (response['approved'] == true) {
-          paymentDelegates!.successCallback(value.body.toString());
-          Navigator.of(context).pop();
-        } else {
-          paymentDelegates!.cancelCallback(value.body.toString());
-          Navigator.of(context).pop();
-        }
+        // Dialogs().showProgressDialog(context);
+        await NetworkUtils.fetchPaymentTransaction(
+          sessionId,
+          methodType: '2',
+          context: context,
+          apikey: NetworkUtils.token,
+          openScreen: () {
+            var redirectResponse = NetworkUtils.fetchPaymentTransactions;
+            if (redirectResponse.state == 'paid') {
+              NetworkUtils.paymentDelegates!.successCallback(
+                  jsonEncode(redirectResponse.responseConfig!.toJson()));
+              Navigator.of(context).pop();
+            } else {
+              NetworkUtils.paymentDelegates!.cancelCallback(
+                  jsonEncode(redirectResponse.responseConfig!.toJson()));
+              Navigator.of(context).pop();
+            }
+          },
+        );
       } else {
         ShowToast().showToast('Try Again!');
       }

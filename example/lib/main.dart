@@ -32,8 +32,8 @@ class _HomeScreenState extends State<HomeScreen> implements PaymentDelegate {
       await ottu.open(
         context,
         'session_id',
-        'API_KEY',
-        'MERCHANT_ID',
+        'api_key',
+        'merchant_id',
         this,
         lang: lan,
       );

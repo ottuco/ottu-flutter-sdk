@@ -79,16 +79,20 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   final cvvController = TextEditingController();
   final cardOnNameController = TextEditingController();
   final dateController = TextEditingController();
-  final savedcardcvvController = TextEditingController();
-  final TextEditingController numberController = TextEditingController();
+  final savedcardcvvControllers = <TextEditingController>[
+    TextEditingController()
+  ];
+  final TextEditingController numberController =
+      TextEditingController(text: '');
   final scaffoldState = GlobalKey<ScaffoldState>();
-  // final _numberFieldFocusNode = FocusNode();
   bool isEnable = true;
   String fees = '';
   var cvvString = '';
   String feesCurrencyCode = '';
   String total = '';
   bool cvvrequired = false;
+  bool ignoreTouch = false;
+  int savedcvvindex = 0;
 
   c.FetchPaymentTransaction fetchPaymentTransaction =
       c.FetchPaymentTransaction();
@@ -96,9 +100,11 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   void _getCardTypeFrmNumber() {
     String input = CardUtils.getCleanedNumber(numberController.text);
     CardType cardType = CardUtils.getCardTypeFrmNumber(input);
-    setState(() {
-      paymentCard.type = cardType;
-    });
+    if (mounted) {
+      setState(() {
+        paymentCard.type = cardType;
+      });
+    }
   }
 
   onLoadComplete() async {
@@ -115,10 +121,16 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    //skdinitialization
+    //sdk initialization
     onLoadComplete();
     paymentCard.type = CardType.Others;
-    numberController.addListener(_getCardTypeFrmNumber);
+    for (var element in widget.fetchPaymentTransactions!.paymentMethods!) {
+      if (element.flow == 'card') {
+        numberController.addListener(_getCardTypeFrmNumber);
+        break;
+      }
+    }
+
     if (widget.type != '1') {
       setState(() {
         payType = '';
@@ -139,6 +151,7 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
         currencyCode = fetchPaymentTransaction.currencyCode.toString();
       });
     }
+    generateControllers();
   }
 
   setPayButtonEnabled(String cvv) {
@@ -147,13 +160,26 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     });
   }
 
+  void generateControllers() {
+    if (fetchPaymentTransaction.cards!.isNotEmpty) {
+      savedcardcvvControllers.clear();
+      List.generate(fetchPaymentTransaction.cards!.length, (index) {
+        var con = TextEditingController();
+        savedcardcvvControllers.add(con);
+      });
+    }
+  }
+
   @override
   void dispose() {
     /// to dispose controllers
-    cvvController.clear();
-    cardOnNameController.clear();
-    dateController.clear();
-    numberController.clear();
+    if (mounted) {
+      cvvController.clear();
+      cardOnNameController.clear();
+      dateController.clear();
+      numberController.removeListener(() {});
+      numberController.clear();
+    }
     super.dispose();
   }
 
@@ -170,48 +196,141 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 children: [
                   Form(
                     key: formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          height: 10,
-                        ),
-
-                        /// shimmer Animation
-                        if (isEnable)
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: const ShimmerWidget.rect(
-                                height: 100.0,
-                              ),
-                            ),
+                    child: IgnorePointer(
+                      ignoring: ignoreTouch,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            height: 10,
                           ),
 
-                        /// ---- End Shimmer Animation
-
-                        /// Total amount
-                        if (!isEnable)
-                          Container(
-                            decoration: BoxDecoration(
-                              color: whiteColor,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: shadowColor, width: 3),
+                          /// shimmer Animation
+                          if (isEnable)
+                            Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: const ShimmerWidget.rect(
+                                  height: 100.0,
+                                ),
+                              ),
                             ),
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (total.isNotEmpty &&
-                                      double.parse(fees) > 0)
+
+                          /// ---- End Shimmer Animation
+
+                          /// Total amount
+                          if (!isEnable)
+                            Container(
+                              decoration: BoxDecoration(
+                                color: whiteColor,
+                                borderRadius: BorderRadius.circular(16),
+                                border:
+                                    Border.all(color: shadowColor, width: 3),
+                              ),
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (total.isNotEmpty &&
+                                        double.parse(fees) > 0)
+                                      Row(
+                                        children: [
+                                          Text(
+                                            S.of(context).Subtotal,
+                                            style: TextStyle(
+                                              fontSize: 15.sp,
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: fetchPaymentTransaction
+                                                      .amount
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                    color: primaryColor,
+                                                    fontSize: 17.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text:
+                                                      ' ${fetchPaymentTransaction.currencyCode}',
+                                                  style: TextStyle(
+                                                    fontSize: 13.sp,
+                                                    color: primaryColor,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    if (total.isNotEmpty &&
+                                        double.parse(fees) > 0)
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                    if (fees.isNotEmpty &&
+                                        double.parse(fees) > 0)
+                                      Row(
+                                        children: [
+                                          Text(
+                                            S.of(context).fees,
+                                            style: TextStyle(
+                                              fontSize: 15.sp,
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: fees.toString(),
+                                                  style: TextStyle(
+                                                    fontSize: 17.sp,
+                                                    color: primaryColor,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: ' $feesCurrencyCode',
+                                                  style: TextStyle(
+                                                    fontSize: 13.sp,
+                                                    color: primaryColor,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    if (fees.isNotEmpty &&
+                                        double.parse(fees) > 0)
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                    if (fees.isNotEmpty &&
+                                        double.parse(fees) > 0)
+                                      const Divider(
+                                        color: dividerColor,
+                                      ),
                                     Row(
                                       children: [
                                         Text(
-                                          S.of(context).Subtotal,
+                                          S.of(context).TotalBill,
                                           style: TextStyle(
                                             fontSize: 15.sp,
                                             color: secondaryColor,
@@ -223,20 +342,15 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                           text: TextSpan(
                                             children: [
                                               TextSpan(
-                                                text: fetchPaymentTransaction
-                                                    .amount
-                                                    .toString(),
+                                                text: amount.toString(),
                                                 style: TextStyle(
-                                                  color: primaryColor,
                                                   fontSize: 17.sp,
+                                                  color: primaryColor,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                               TextSpan(
-                                                text: ' ' +
-                                                    fetchPaymentTransaction
-                                                        .currencyCode
-                                                        .toString(),
+                                                text: ' $feesCurrencyCode',
                                                 style: TextStyle(
                                                   fontSize: 13.sp,
                                                   color: primaryColor,
@@ -247,669 +361,632 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                         ),
                                       ],
                                     ),
-                                  if (total.isNotEmpty &&
-                                      double.parse(fees) > 0)
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                  if (fees.isNotEmpty && double.parse(fees) > 0)
-                                    Row(
-                                      children: [
-                                        Text(
-                                          S.of(context).fees,
-                                          style: TextStyle(
-                                            fontSize: 15.sp,
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        RichText(
-                                          text: TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                text: fees.toString(),
-                                                style: TextStyle(
-                                                  fontSize: 17.sp,
-                                                  color: primaryColor,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              TextSpan(
-                                                text: ' ' + feesCurrencyCode,
-                                                style: TextStyle(
-                                                  fontSize: 13.sp,
-                                                  color: primaryColor,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  if (fees.isNotEmpty && double.parse(fees) > 0)
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                  if (fees.isNotEmpty && double.parse(fees) > 0)
                                     const Divider(
                                       color: dividerColor,
                                     ),
-                                  Row(
-                                    children: [
+
+                                    /// ---- End Total Amount
+
+                                    //Apple pay
+                                    if (Platform.isIOS &&
+                                        fetchPaymentTransaction
+                                            .applePayAvailable!)
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+
+                                    if (Platform.isIOS &&
+                                        fetchPaymentTransaction
+                                            .applePayAvailable!)
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: blackColor,
+                                          shape: const StadiumBorder(),
+                                        ),
+                                        onPressed: () {
+                                          ApplePay().paywithApple(
+                                            fetchPaymentTransaction
+                                                .applePayConfig!.validationUrl
+                                                .toString(),
+                                            widget.context!,
+                                            fetchPaymentTransaction
+                                                .applePayConfig!.currencyCode!,
+                                            fetchPaymentTransaction
+                                                .applePayConfig!.countryCode!,
+                                            fetchPaymentTransaction
+                                                .applePayConfig!.amount!,
+                                            fetchPaymentTransaction
+                                                .applePayConfig!.shopName!,
+                                            fetchPaymentTransaction
+                                                .applePayConfig!.paymentUrl
+                                                .toString(),
+                                          );
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(11.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Image.asset(
+                                                '${imagePath}apple_logo.png',
+                                                package: 'ottu',
+                                                width: 20,
+                                              ),
+                                              const SizedBox(
+                                                width: 6,
+                                              ),
+                                              Text(
+                                                S.of(context).pay,
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    if (Platform.isIOS &&
+                                        fetchPaymentTransaction
+                                            .applePayAvailable! &&
+                                        fetchPaymentTransaction
+                                            .cards!.isNotEmpty)
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
+                                    if (Platform.isIOS &&
+                                        fetchPaymentTransaction
+                                            .applePayAvailable! &&
+                                        fetchPaymentTransaction
+                                            .cards!.isNotEmpty)
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Flexible(
+                                            child: Divider(
+                                              color: dividerColor,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12.0),
+                                            child: Text(
+                                              S.of(context).OrPayWithCard,
+                                              style: const TextStyle(
+                                                color: secondaryGreyColor,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                          const Flexible(
+                                            child: Divider(
+                                              color: dividerColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    if (Platform.isIOS &&
+                                        fetchPaymentTransaction
+                                            .applePayAvailable! &&
+                                        fetchPaymentTransaction
+                                            .cards!.isNotEmpty)
+                                      const SizedBox(
+                                        height: 14,
+                                      ),
+
+                                    ///---- End Apple pay
+
+                                    ///Saved Card
+                                    if (fetchPaymentTransaction
+                                        .cards!.isNotEmpty)
                                       Text(
-                                        S.of(context).TotalBill,
+                                        S.of(context).SavedCards,
                                         style: TextStyle(
                                           fontSize: 15.sp,
+                                        ),
+                                      ),
+                                    SizedBox(
+                                      height: 5.sp,
+                                    ),
+                                    if (fetchPaymentTransaction
+                                        .cards!.isNotEmpty)
+                                      Text(
+                                        S.of(context).Listofallcardssaved,
+                                        style: TextStyle(
+                                          fontSize: 10.sp,
                                           color: secondaryColor,
-                                          fontWeight: FontWeight.w400,
                                         ),
                                       ),
-                                      const Spacer(),
-                                      RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: amount.toString(),
-                                              style: TextStyle(
-                                                fontSize: 17.sp,
-                                                color: primaryColor,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                              text: ' ' +
+                                    if (fetchPaymentTransaction
+                                        .cards!.isNotEmpty)
+                                      const SizedBox(
+                                        height: 7,
+                                      ),
+                                    if (fetchPaymentTransaction
+                                        .cards!.isNotEmpty)
+                                      ListView.builder(
+                                        key: const ValueKey('savedcards'),
+                                        padding: EdgeInsets.zero,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: fetchPaymentTransaction
+                                            .cards!.length,
+                                        shrinkWrap: true,
+                                        itemBuilder: (ctx, i) {
+                                          return InkWell(
+                                            onTap: () {
+                                              if (!fetchPaymentTransaction
+                                                  .cards![i].isSelected) {
+                                                for (var element
+                                                    in fetchPaymentTransaction
+                                                        .cards!) {
+                                                  setState(() {
+                                                    element.isSelected = false;
+                                                  });
+                                                }
+                                                for (var element
+                                                    in fetchPaymentTransaction
+                                                        .paymentMethods!) {
+                                                  setState(() {
+                                                    element.isRedirectSelected =
+                                                        false;
+                                                  });
+                                                }
+                                                for (var element
+                                                    in fetchPaymentTransaction
+                                                        .paymentMethods!) {
+                                                  setState(() {
+                                                    element.isSelected = false;
+                                                  });
+                                                }
+                                              }
+                                              setState(() {
+                                                fetchPaymentTransaction
+                                                    .cards![i]
+                                                    .isSelected = true;
+                                                // !fetchPaymentTransaction
+                                                //     .cards![i].isSelected;
+                                                if (fetchPaymentTransaction
+                                                    .cards![i].isSelected) {
+                                                  paywithSavedCard =
+                                                      fetchPaymentTransaction
+                                                          .cards![i];
+                                                  payType = '';
+                                                  savedcvvindex = i;
+                                                  cvvrequired =
+                                                      fetchPaymentTransaction
+                                                          .cards![i]
+                                                          .requiredCvv!;
+                                                  for (var methods
+                                                      in fetchPaymentTransaction
+                                                          .paymentMethods!) {
+                                                    if (methods.code ==
+                                                        fetchPaymentTransaction
+                                                            .cards![i].pgCode) {
+                                                      setState(() {
+                                                        fees = methods.fee
+                                                            .toString();
+                                                        feesCurrencyCode =
+                                                            methods.currencyCode
+                                                                .toString();
+                                                        amount = methods.amount
+                                                            .toString();
+                                                        total =
+                                                            fetchPaymentTransaction
+                                                                .amount
+                                                                .toString();
+                                                      });
+                                                    }
+                                                  }
+                                                }
+                                                if (!fetchPaymentTransaction
+                                                    .cards![i].isSelected) {
+                                                  setState(() {
+                                                    total = '';
+                                                    feesCurrencyCode = '';
+                                                    amount =
+                                                        fetchPaymentTransaction
+                                                            .amount
+                                                            .toString();
+                                                    fees = '';
+                                                    payType = '';
+                                                  });
+                                                }
+                                              });
+                                            },
+                                            child: SavedCard(
+                                              cvvStatus: setPayButtonEnabled,
+                                              cvvcontroller:
+                                                  savedcardcvvControllers[i],
+                                              paywithcvv:
                                                   fetchPaymentTransaction
-                                                      .currencyCode
+                                                      .cards![i].requiredCvv!,
+                                              isSelected:
+                                                  fetchPaymentTransaction
+                                                      .cards![i].isSelected,
+                                              brand: fetchPaymentTransaction
+                                                  .cards![i].brand
+                                                  .toString(),
+                                              expiryMonth:
+                                                  fetchPaymentTransaction
+                                                      .cards![i].expiryMonth
                                                       .toString(),
-                                              style: TextStyle(
-                                                fontSize: 13.sp,
-                                                color: primaryColor,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Divider(
-                                    color: dividerColor,
-                                  ),
-
-                                  /// ---- End Total Amount
-
-                                  ///Apple pay
-                                  if (Platform.isIOS)
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                  if (Platform.isIOS)
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        primary: blackColor,
-                                        shape: const StadiumBorder(),
-                                      ),
-                                      onPressed: () {
-                                        ApplePay().paywithApple(
-                                          fetchPaymentTransaction
-                                              .applePayConfig!.validationUrl
-                                              .toString(),
-                                          widget.context!,
-                                          fetchPaymentTransaction
-                                              .applePayConfig!.currencyCode!,
-                                          fetchPaymentTransaction
-                                              .applePayConfig!.countryCode!,
-                                          fetchPaymentTransaction
-                                              .applePayConfig!.amount!,
-                                          fetchPaymentTransaction
-                                              .applePayConfig!.domain!,
-                                          fetchPaymentTransaction
-                                              .applePayConfig!.paymentUrl
-                                              .toString(),
-                                        );
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(11.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Image.asset(
-                                              imagePath + 'apple_logo.png',
-                                              package: 'ottu',
-                                              width: 20,
+                                              expiryYear:
+                                                  fetchPaymentTransaction
+                                                      .cards![i].expiryYear
+                                                      .toString(),
+                                              onCardTap: () {
+                                                Dialogs().showDialogs(
+                                                  context,
+                                                  () async {
+                                                    NetworkUtils().deleteCard(
+                                                      fetchPaymentTransaction
+                                                          .cards![i].deleteUrl
+                                                          .toString(),
+                                                      () {
+                                                        setState(() {
+                                                          fetchPaymentTransaction
+                                                              .cards!
+                                                              .removeAt(i);
+                                                        });
+                                                      },
+                                                      context,
+                                                    );
+                                                  },
+                                                  '${fetchPaymentTransaction.cards![i].brand} ${fetchPaymentTransaction.cards![i].number}',
+                                                );
+                                              },
+                                              number: fetchPaymentTransaction
+                                                  .cards![i].number
+                                                  .toString(),
                                             ),
-                                            const SizedBox(
-                                              width: 6,
-                                            ),
-                                            Text(
-                                              S.of(context).pay,
-                                              style: TextStyle(
-                                                fontSize: 16.sp,
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                                          );
+                                        },
                                       ),
-                                    ),
-                                  if (Platform.isIOS)
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                  if (Platform.isIOS)
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Flexible(
-                                          child: Divider(
-                                            color: dividerColor,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12.0),
-                                          child: Text(
-                                            S.of(context).OrPayWithCard,
-                                            style: const TextStyle(
-                                              color: secondaryGreyColor,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ),
-                                        const Flexible(
-                                          child: Divider(
-                                            color: dividerColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  if (Platform.isIOS)
-                                    const SizedBox(
-                                      height: 14,
-                                    ),
 
-                                  ///---- End Apple pay
+                                    ///---- End Saved Card
+                                  ],
+                                ),
+                              ),
+                            ),
+                          const SizedBox(
+                            height: 20,
+                          ),
 
-                                  ///Saved Card
-                                  if (fetchPaymentTransaction.cards!.isNotEmpty)
+                          ///Shimmer Effect
+                          if (isEnable)
+                            Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: const ShimmerWidget.rect(
+                                  height: 200.0,
+                                ),
+                              ),
+                            ),
+
+                          ///---- end shimmer effect
+                          if (!isEnable)
+
+                            /// Payment menthods
+                            Container(
+                              decoration: BoxDecoration(
+                                color: whiteColor,
+                                borderRadius: BorderRadius.circular(16),
+                                border:
+                                    Border.all(color: shadowColor, width: 3),
+                              ),
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                      S.of(context).SavedCards,
+                                      S.of(context).PaymentMethods,
                                       style: TextStyle(
                                         fontSize: 15.sp,
                                       ),
                                     ),
-                                  SizedBox(
-                                    height: 5.sp,
-                                  ),
-                                  if (fetchPaymentTransaction.cards!.isNotEmpty)
+                                    SizedBox(
+                                      height: 5.sp,
+                                    ),
                                     Text(
-                                      S.of(context).Listofallcardssaved,
+                                      S.of(context).Listofallgatewayswesupport,
                                       style: TextStyle(
                                         fontSize: 10.sp,
                                         color: secondaryColor,
                                       ),
                                     ),
-                                  if (fetchPaymentTransaction.cards!.isNotEmpty)
-                                    const SizedBox(
-                                      height: 7,
+                                    SizedBox(
+                                      height: 5.h,
                                     ),
-                                  if (fetchPaymentTransaction.cards!.isNotEmpty)
                                     ListView.builder(
-                                      key: const ValueKey('savedcards'),
-                                      padding: EdgeInsets.zero,
                                       physics:
                                           const NeverScrollableScrollPhysics(),
-                                      itemCount:
-                                          fetchPaymentTransaction.cards!.length,
+                                      key: const ValueKey('methods'),
                                       shrinkWrap: true,
+                                      padding: EdgeInsets.zero,
+                                      itemCount: fetchPaymentTransaction
+                                          .paymentMethods!.length,
                                       itemBuilder: (ctx, i) {
-                                        return InkWell(
-                                          onTap: () {
-                                            if (!fetchPaymentTransaction
-                                                .cards![i].isSelected) {
-                                              for (var element
-                                                  in fetchPaymentTransaction
-                                                      .cards!) {
-                                                setState(() {
-                                                  element.isSelected = false;
-                                                });
-                                              }
-                                              for (var element
-                                                  in fetchPaymentTransaction
-                                                      .paymentMethods!) {
-                                                setState(() {
-                                                  element.isRedirectSelected =
-                                                      false;
-                                                });
-                                              }
-                                              for (var element
-                                                  in fetchPaymentTransaction
-                                                      .paymentMethods!) {
-                                                setState(() {
-                                                  element.isSelected = false;
-                                                });
-                                              }
-                                            }
-                                            setState(() {
-                                              fetchPaymentTransaction
-                                                      .cards![i].isSelected =
-                                                  !fetchPaymentTransaction
-                                                      .cards![i].isSelected;
-                                              if (fetchPaymentTransaction
-                                                  .cards![i].isSelected) {
-                                                paywithSavedCard =
-                                                    fetchPaymentTransaction
-                                                        .cards![i];
-                                                payType = '';
-                                                cvvrequired =
-                                                    fetchPaymentTransaction
-                                                        .cards![i].requiredCvv!;
-                                                for (var methods
+                                        return CardTile(
+                                          fetchPaymentTransaction.cansavecard!,
+                                          setPayButtonEnabled,
+                                          () {
+                                            if (fetchPaymentTransaction
+                                                    .paymentMethods![i].flow ==
+                                                'card') {
+                                              if (!fetchPaymentTransaction
+                                                  .paymentMethods![i]
+                                                  .isSelected) {
+                                                for (var singleTransaction
                                                     in fetchPaymentTransaction
                                                         .paymentMethods!) {
-                                                  if (methods.code ==
-                                                      fetchPaymentTransaction
-                                                          .cards![i].pgCode) {
+                                                  setState(() {
+                                                    singleTransaction
+                                                        .isSelected = false;
+                                                  });
+                                                }
+                                                for (var element
+                                                    in fetchPaymentTransaction
+                                                        .paymentMethods!) {
+                                                  setState(() {
+                                                    element.isRedirectSelected =
+                                                        false;
+                                                  });
+                                                }
+                                                if (fetchPaymentTransaction
+                                                        .cards !=
+                                                    null) {
+                                                  for (var element
+                                                      in fetchPaymentTransaction
+                                                          .cards!) {
                                                     setState(() {
-                                                      fees = methods.fee
+                                                      element.isSelected =
+                                                          false;
+                                                    });
+                                                  }
+                                                }
+                                              }
+                                              setState(() {
+                                                fetchPaymentTransaction
+                                                    .paymentMethods![i]
+                                                    .isSelected = true;
+                                                // fetchPaymentTransaction
+                                                //         .paymentMethods![i]
+                                                //         .isSelected =
+                                                //     !fetchPaymentTransaction
+                                                //         .paymentMethods![i]
+                                                //         .isSelected;
+                                                if (fetchPaymentTransaction
+                                                    .paymentMethods![i]
+                                                    .isSelected) {
+                                                  payType = '';
+                                                  submitURL =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i]
+                                                          .submitUrl
                                                           .toString();
-                                                      feesCurrencyCode = methods
+                                                  fees = fetchPaymentTransaction
+                                                      .paymentMethods![i].fee
+                                                      .toString();
+                                                  feesCurrencyCode =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i]
                                                           .currencyCode
                                                           .toString();
-                                                      amount = methods.amount
+                                                  total =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i]
+                                                          .amount
                                                           .toString();
-                                                      total =
-                                                          fetchPaymentTransaction
-                                                              .amount
-                                                              .toString();
+
+                                                  amount =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i]
+                                                          .amount
+                                                          .toString();
+                                                } else {
+                                                  setState(() {
+                                                    fees = '';
+                                                    total = '';
+                                                    feesCurrencyCode = '';
+                                                    amount =
+                                                        fetchPaymentTransaction
+                                                            .amount
+                                                            .toString();
+                                                    payType = '';
+                                                  });
+                                                }
+                                              });
+                                            } else {
+                                              if (!fetchPaymentTransaction
+                                                  .paymentMethods![i]
+                                                  .isSelected) {
+                                                for (var singleTransaction
+                                                    in fetchPaymentTransaction
+                                                        .paymentMethods!) {
+                                                  setState(() {
+                                                    singleTransaction
+                                                        .isSelected = false;
+                                                  });
+                                                }
+                                                if (fetchPaymentTransaction
+                                                        .cards !=
+                                                    null) {
+                                                  for (var element
+                                                      in fetchPaymentTransaction
+                                                          .cards!) {
+                                                    setState(() {
+                                                      element.isSelected =
+                                                          false;
                                                     });
                                                   }
                                                 }
                                               }
                                               if (!fetchPaymentTransaction
-                                                  .cards![i].isSelected) {
-                                                setState(() {
+                                                  .paymentMethods![i]
+                                                  .isRedirectSelected) {
+                                                for (var element
+                                                    in fetchPaymentTransaction
+                                                        .paymentMethods!) {
+                                                  setState(() {
+                                                    element.isRedirectSelected =
+                                                        false;
+                                                  });
+                                                }
+                                              }
+                                              setState(() {
+                                                fetchPaymentTransaction
+                                                    .paymentMethods![i]
+                                                    .isRedirectSelected = true;
+                                                // !fetchPaymentTransaction
+                                                //     .paymentMethods![i]
+                                                //     .isRedirectSelected;
+                                                if (fetchPaymentTransaction
+                                                    .paymentMethods![i]
+                                                    .isRedirectSelected) {
+                                                  fees = fetchPaymentTransaction
+                                                      .paymentMethods![i].fee
+                                                      .toString();
+                                                  amount =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i]
+                                                          .amount
+                                                          .toString();
+                                                  total =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i]
+                                                          .amount
+                                                          .toString();
+                                                  feesCurrencyCode =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i]
+                                                          .currencyCode
+                                                          .toString();
+                                                  paywithRedirectFlow =
+                                                      fetchPaymentTransaction
+                                                          .paymentMethods![i];
+                                                  payType = 'redirectFlow';
+                                                } else {
+                                                  fees = '';
                                                   total = '';
+                                                  feesCurrencyCode = '';
                                                   amount =
                                                       fetchPaymentTransaction
                                                           .amount
                                                           .toString();
-                                                  fees = '';
                                                   payType = '';
-                                                });
-                                              }
+                                                }
+                                              });
+                                            }
+                                          },
+                                          numberController,
+                                          cvvController,
+                                          cardOnNameController,
+                                          dateController,
+                                          // _numberFieldFocusNode,
+                                          fetchPaymentTransaction
+                                              .paymentMethods![i].icon
+                                              .toString(),
+                                          fetchPaymentTransaction
+                                              .paymentMethods![i].name
+                                              .toString(),
+                                          fetchPaymentTransaction
+                                              .paymentMethods![i].fee
+                                              .toString(),
+                                          fetchPaymentTransaction
+                                              .paymentMethods![i].isSelected,
+                                          fetchPaymentTransaction
+                                              .paymentMethods![i].ischecked,
+                                          () {
+                                            setState(() {
+                                              fetchPaymentTransaction
+                                                      .paymentMethods![i]
+                                                      .ischecked =
+                                                  !fetchPaymentTransaction
+                                                      .paymentMethods![i]
+                                                      .ischecked;
+                                              ischecked =
+                                                  fetchPaymentTransaction
+                                                      .paymentMethods![i]
+                                                      .ischecked;
                                             });
                                           },
-                                          child: SavedCard(
-                                            cvvStatus: setPayButtonEnabled,
-                                            cvvcontroller:
-                                                savedcardcvvController,
-                                            paywithcvv: fetchPaymentTransaction
-                                                .cards![i].requiredCvv!,
-                                            isSelected: fetchPaymentTransaction
-                                                .cards![i].isSelected,
-                                            brand: fetchPaymentTransaction
-                                                .cards![i].brand
-                                                .toString(),
-                                            expiryMonth: fetchPaymentTransaction
-                                                .cards![i].expiryMonth
-                                                .toString(),
-                                            expiryYear: fetchPaymentTransaction
-                                                .cards![i].expiryYear
-                                                .toString(),
-                                            onCardTap: () {
-                                              Dialogs().showDialogs(
-                                                context,
-                                                () async {
-                                                  NetworkUtils().deleteCard(
-                                                    fetchPaymentTransaction
-                                                        .cards![i].deleteUrl
-                                                        .toString(),
-                                                    () {
-                                                      setState(() {
-                                                        fetchPaymentTransaction
-                                                            .cards!
-                                                            .removeAt(i);
-                                                      });
-                                                    },
-                                                    context,
-                                                  );
-                                                },
-                                                fetchPaymentTransaction
-                                                        .cards![i].brand
-                                                        .toString() +
-                                                    ' ' +
-                                                    fetchPaymentTransaction
-                                                        .cards![i].number
-                                                        .toString(),
-                                              );
-                                            },
-                                            number: fetchPaymentTransaction
-                                                .cards![i].number
-                                                .toString(),
-                                          ),
+                                          fetchPaymentTransaction
+                                              .paymentMethods![i]
+                                              .isRedirectSelected,
+                                          fetchPaymentTransaction.customerId
+                                              .toString(),
                                         );
                                       },
                                     ),
-
-                                  ///---- End Saved Card
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        const SizedBox(
-                          height: 20,
-                        ),
 
-                        ///Shimmer Effect
-                        if (isEnable)
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: const ShimmerWidget.rect(
-                                height: 200.0,
+                          ///---- end payment method
+
+                          const SizedBox(
+                            height: 10,
+                          ),
+
+                          if (isEnable)
+                            Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(30),
+                                child: const ShimmerWidget.rect(
+                                  height: 50.0,
+                                ),
                               ),
                             ),
-                          ),
+                          // if (cvvString.isNotEmpty || payType.isNotEmpty)
+                          //   Container(
+                          //     width: double.infinity,
+                          //     padding: const EdgeInsets.symmetric(horizontal: 20),
+                          //     child: ElevatedButton(
+                          //       style: ElevatedButton.styleFrom(
+                          //         primary: primaryColor,
+                          //         shape: const StadiumBorder(),
+                          //       ),
+                          //       onPressed: null,
+                          //       child: Padding(
+                          //         padding: const EdgeInsets.all(14.0),
+                          //         child: Text(
+                          //           S.of(context).PayNow,
+                          //           style: const TextStyle(
+                          //             fontWeight: FontWeight.bold,
+                          //             fontSize: 17,
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ),
 
-                        ///---- end shimmer effect
-                        if (!isEnable)
-
-                          /// Payment menthods
-                          Container(
-                            decoration: BoxDecoration(
-                              color: whiteColor,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: shadowColor, width: 3),
-                            ),
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    S.of(context).PaymentMethods,
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 5.sp,
-                                  ),
-                                  Text(
-                                    S.of(context).Listofallgatewayswesupport,
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: secondaryColor,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 5.h,
-                                  ),
-                                  ListView.builder(
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    key: const ValueKey('methods'),
-                                    shrinkWrap: true,
-                                    padding: EdgeInsets.zero,
-                                    itemCount: fetchPaymentTransaction
-                                        .paymentMethods!.length,
-                                    itemBuilder: (ctx, i) {
-                                      return CardTile(
-                                        fetchPaymentTransaction.cansavecard!,
-                                        setPayButtonEnabled,
-                                        () {
-                                          if (fetchPaymentTransaction
-                                                  .paymentMethods![i].flow ==
-                                              'card') {
-                                            if (!fetchPaymentTransaction
-                                                .paymentMethods![i]
-                                                .isSelected) {
-                                              for (var singleTransaction
-                                                  in fetchPaymentTransaction
-                                                      .paymentMethods!) {
-                                                setState(() {
-                                                  singleTransaction.isSelected =
-                                                      false;
-                                                });
-                                              }
-                                              for (var element
-                                                  in fetchPaymentTransaction
-                                                      .paymentMethods!) {
-                                                setState(() {
-                                                  element.isRedirectSelected =
-                                                      false;
-                                                });
-                                              }
-                                              if (fetchPaymentTransaction
-                                                      .cards !=
-                                                  null) {
-                                                for (var element
-                                                    in fetchPaymentTransaction
-                                                        .cards!) {
-                                                  setState(() {
-                                                    element.isSelected = false;
-                                                  });
-                                                }
-                                              }
-                                            }
-                                            setState(() {
-                                              fetchPaymentTransaction
-                                                      .paymentMethods![i]
-                                                      .isSelected =
-                                                  !fetchPaymentTransaction
-                                                      .paymentMethods![i]
-                                                      .isSelected;
-                                              if (fetchPaymentTransaction
-                                                  .paymentMethods![i]
-                                                  .isSelected) {
-                                                payType = '';
-                                                submitURL =
-                                                    fetchPaymentTransaction
-                                                        .paymentMethods![i]
-                                                        .submitUrl
-                                                        .toString();
-                                                fees = fetchPaymentTransaction
-                                                    .paymentMethods![i].fee
-                                                    .toString();
-                                                feesCurrencyCode =
-                                                    fetchPaymentTransaction
-                                                        .paymentMethods![i]
-                                                        .currencyCode
-                                                        .toString();
-                                                total = fetchPaymentTransaction
-                                                    .paymentMethods![i].amount
-                                                    .toString();
-
-                                                amount = fetchPaymentTransaction
-                                                    .paymentMethods![i].amount
-                                                    .toString();
-                                              } else {
-                                                setState(() {
-                                                  fees = '';
-                                                  total = '';
-                                                  amount =
-                                                      fetchPaymentTransaction
-                                                          .amount
-                                                          .toString();
-                                                  payType = '';
-                                                });
-                                              }
-                                            });
-                                          } else {
-                                            if (!fetchPaymentTransaction
-                                                .paymentMethods![i]
-                                                .isSelected) {
-                                              for (var singleTransaction
-                                                  in fetchPaymentTransaction
-                                                      .paymentMethods!) {
-                                                setState(() {
-                                                  singleTransaction.isSelected =
-                                                      false;
-                                                });
-                                              }
-                                              if (fetchPaymentTransaction
-                                                      .cards !=
-                                                  null) {
-                                                for (var element
-                                                    in fetchPaymentTransaction
-                                                        .cards!) {
-                                                  setState(() {
-                                                    element.isSelected = false;
-                                                  });
-                                                }
-                                              }
-                                            }
-                                            if (!fetchPaymentTransaction
-                                                .paymentMethods![i]
-                                                .isRedirectSelected) {
-                                              for (var element
-                                                  in fetchPaymentTransaction
-                                                      .paymentMethods!) {
-                                                setState(() {
-                                                  element.isRedirectSelected =
-                                                      false;
-                                                });
-                                              }
-                                            }
-                                            setState(() {
-                                              fetchPaymentTransaction
-                                                      .paymentMethods![i]
-                                                      .isRedirectSelected =
-                                                  !fetchPaymentTransaction
-                                                      .paymentMethods![i]
-                                                      .isRedirectSelected;
-                                              if (fetchPaymentTransaction
-                                                  .paymentMethods![i]
-                                                  .isRedirectSelected) {
-                                                fees = fetchPaymentTransaction
-                                                    .paymentMethods![i].fee
-                                                    .toString();
-                                                amount = fetchPaymentTransaction
-                                                    .paymentMethods![i].amount
-                                                    .toString();
-                                                total = fetchPaymentTransaction
-                                                    .paymentMethods![i].amount
-                                                    .toString();
-                                                feesCurrencyCode =
-                                                    fetchPaymentTransaction
-                                                        .paymentMethods![i]
-                                                        .currencyCode
-                                                        .toString();
-                                                paywithRedirectFlow =
-                                                    fetchPaymentTransaction
-                                                        .paymentMethods![i];
-                                                payType = 'redirectFlow';
-                                              } else {
-                                                fees = '';
-                                                total = '';
-                                                amount = fetchPaymentTransaction
-                                                    .amount
-                                                    .toString();
-                                                payType = '';
-                                              }
-                                            });
-                                          }
-                                        },
-                                        numberController,
-                                        cvvController,
-                                        cardOnNameController,
-                                        dateController,
-                                        // _numberFieldFocusNode,
-                                        fetchPaymentTransaction
-                                            .paymentMethods![i].icon
-                                            .toString(),
-                                        fetchPaymentTransaction
-                                            .paymentMethods![i].name
-                                            .toString(),
-                                        fetchPaymentTransaction
-                                            .paymentMethods![i].fee
-                                            .toString(),
-                                        fetchPaymentTransaction
-                                            .paymentMethods![i].isSelected,
-                                        fetchPaymentTransaction
-                                            .paymentMethods![i].ischecked,
-                                        () {
-                                          setState(() {
-                                            fetchPaymentTransaction
-                                                    .paymentMethods![i]
-                                                    .ischecked =
-                                                !fetchPaymentTransaction
-                                                    .paymentMethods![i]
-                                                    .ischecked;
-                                            ischecked = fetchPaymentTransaction
-                                                .paymentMethods![i].ischecked;
-                                          });
-                                        },
-                                        fetchPaymentTransaction
-                                            .paymentMethods![i]
-                                            .isRedirectSelected,
-                                        fetchPaymentTransaction.customerId
-                                            .toString(),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                        ///---- end payment method
-
-                        const SizedBox(
-                          height: 10,
-                        ),
-
-                        if (isEnable)
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
-                              child: const ShimmerWidget.rect(
-                                height: 50.0,
-                              ),
-                            ),
-                          ),
-                        // if (cvvString.isNotEmpty || payType.isNotEmpty)
-                        //   Container(
-                        //     width: double.infinity,
-                        //     padding: const EdgeInsets.symmetric(horizontal: 20),
-                        //     child: ElevatedButton(
-                        //       style: ElevatedButton.styleFrom(
-                        //         primary: primaryColor,
-                        //         shape: const StadiumBorder(),
-                        //       ),
-                        //       onPressed: null,
-                        //       child: Padding(
-                        //         padding: const EdgeInsets.all(14.0),
-                        //         child: Text(
-                        //           S.of(context).PayNow,
-                        //           style: const TextStyle(
-                        //             fontWeight: FontWeight.bold,
-                        //             fontSize: 17,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   ),
-
-                        ///pay button
-                        if (!isEnable)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: ElevatedButton(
-                              onPressed:
-                                  cvvString.length != 3 && payType.isEmpty
-                                      ? null
-                                      : () async {
-                                          setState(() {
-                                            isLoading = true;
-                                            isEnabled = false;
-                                          });
+                          ///pay button
+                          if (!isEnable)
+                            Container(
+                              width: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: ElevatedButton(
+                                onPressed: cvvString.length != 3 &&
+                                        payType.isEmpty
+                                    ? null
+                                    : () async {
+                                        setState(() {
+                                          ignoreTouch = true;
+                                          isLoading = true;
+                                          isEnabled = false;
+                                        });
+                                        try {
                                           await PayAmount.payAmount(
                                             publicKeyURL: widget
                                                 .fetchPaymentTransactions!
@@ -917,7 +994,8 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                                 .toString(),
                                             context: widget.context,
                                             savedcardcvvController:
-                                                savedcardcvvController,
+                                                savedcardcvvControllers[
+                                                    savedcvvindex],
                                             cvvrequired: cvvrequired,
                                             fetchPaymentTransaction:
                                                 fetchPaymentTransaction,
@@ -942,42 +1020,51 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                             },
                                           );
                                           setState(() {
+                                            ignoreTouch = false;
                                             isLoading = false;
                                             isEnabled = true;
                                           });
-                                        },
-                              style: ElevatedButton.styleFrom(
-                                primary: primaryColor,
-                                shape: const StadiumBorder(),
+                                        } catch (e) {
+                                          setState(() {
+                                            ignoreTouch = false;
+                                            isLoading = false;
+                                            isEnabled = true;
+                                          });
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryColor,
+                                  shape: const StadiumBorder(),
+                                ),
+                                child: isLoading
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: whiteColor,
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      )
+                                    : Padding(
+                                        padding: const EdgeInsets.all(14.0),
+                                        child: Text(
+                                          S.of(context).PayNow,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ),
                               ),
-                              child: isLoading
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(12),
-                                      child: SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: whiteColor,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                                    )
-                                  : Padding(
-                                      padding: const EdgeInsets.all(14.0),
-                                      child: Text(
-                                        S.of(context).PayNow,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 17,
-                                        ),
-                                      ),
-                                    ),
                             ),
+                          const SizedBox(
+                            height: 10,
                           ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
