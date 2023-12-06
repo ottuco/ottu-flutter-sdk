@@ -181,9 +181,7 @@ class _MobilePopupState extends State<MobilePopup> {
   }
 
   Future<String> submitPhoneNumber(BuildContext context, String sessionId, String phoneNumber) async {
-    const merchantId = "";
     String apiUrl = widget.paymentMethod?.submitUrl ?? '';
-    // const apiUrl = "https://$merchantId/b/checkout/api/sdk/v1/stcpay/submit/";
     final headers = {
       "Content-Type": "application/json",
       "Authorization": 'Api-Key ${NetworkUtils.token}',
@@ -216,11 +214,7 @@ class _MobilePopupState extends State<MobilePopup> {
   }
 
   Future<String> submitOTP(BuildContext context, String sessionId, String otp) async {
-    // const merchantId = "staging4.ottu.dev";
-    //const apiKey = "kZia0dfY.vEWS0cUV5gWV1JDzIvzDfSxKLUh4qAa3";
-    const merchantId = "alpha.ottu.net";
     String apiUrl = widget.paymentMethod?.paymentUrl ?? '';
-    // const apiUrl = "https://$merchantId/b/checkout/api/sdk/v1/stcpay/pay/";
     // final headers = {'Content-Type': 'application/json'};
     final headers = {
       "Content-Type": "application/json",
