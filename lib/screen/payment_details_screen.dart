@@ -101,7 +101,7 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       setState(() {
         payType = '';
         payment = widget.payment!;
-        customerId = widget.payment!.customerId.toString();
+        customerId = widget.payment?.customerId;
         amount = widget.payment!.amount.toString();
         sessionId = payment.sessionId.toString();
         currencyCode = payment.currencyCode.toString();
@@ -404,7 +404,10 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
               const SizedBox(
                 height: 15,
               ),
-            if (Platform.isIOS && payment.applePayAvailable! && payment.applePayConfig!.fee!.isNotEmpty && double.parse(payment.applePayConfig!.fee!) > 0)
+            if (Platform.isIOS && payment.applePayAvailable!
+                && payment.applePayConfig!.fee!.isNotEmpty
+                && double.parse(payment.applePayConfig!.fee!) > 0
+                && payment.customerId == null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -418,7 +421,8 @@ class PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                           ),
                         ),
                         TextSpan(
-                          text: payment.applePayConfig!.fee_description ?? '',
+                          // text: payment.applePayConfig!.fee_description ?? '',
+                          text: S.of(context).fees,
                           style: const TextStyle(
                             color: blackColor,
                           ),

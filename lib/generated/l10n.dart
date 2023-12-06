@@ -431,6 +431,298 @@ class S {
       args: [],
     );
   }
+
+  /// `will be applied`
+  String get WillBeApplied {
+    return Intl.message(
+      'will be applied',
+      name: 'WillBeApplied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close`
+  String get Close {
+    return Intl.message(
+      'Close',
+      name: 'Close',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With saved card you can skip entering card details in your next transactions`
+  String get WithSavedCardYouCanSkipEnteringCardDetailsInYourNextTransactions {
+    return Intl.message(
+      'With saved card you can skip entering card details in your next transactions',
+      name: 'WithSavedCardYouCanSkipEnteringCardDetailsInYourNextTransactions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Thank you!`
+  String get ThankYou {
+    return Intl.message(
+      'Thank you!',
+      name: 'ThankYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Congratulations your transfer was completed successfully`
+  String get CongratulationsYourTransferWasCompletedSuccessfully {
+    return Intl.message(
+      'Congratulations your transfer was completed successfully',
+      name: 'CongratulationsYourTransferWasCompletedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your device is jailbreak. Please try to pay with another device.`
+  String get YourDeviceIsJailbreakPleaseTryToPayWithAnotherDevice {
+    return Intl.message(
+      'Your device is jailbreak. Please try to pay with another device.',
+      name: 'YourDeviceIsJailbreakPleaseTryToPayWithAnotherDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid cvv`
+  String get InvalidCvv {
+    return Intl.message(
+      'Invalid cvv',
+      name: 'InvalidCvv',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid card number`
+  String get InvalidCardNumber {
+    return Intl.message(
+      'Invalid card number',
+      name: 'InvalidCardNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid name`
+  String get InvalidName {
+    return Intl.message(
+      'Invalid name',
+      name: 'InvalidName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Something went wrong.\nPlease try again after sometime or check your device compatibility with apple pay.`
+  String
+      get SomethingWentWrongPleaseTryAgainAfterSometimeOrCheckYourDeviceCompatibilityWithApplePay {
+    return Intl.message(
+      'Something went wrong.\nPlease try again after sometime or check your device compatibility with apple pay.',
+      name:
+          'SomethingWentWrongPleaseTryAgainAfterSometimeOrCheckYourDeviceCompatibilityWithApplePay',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Something went wrong.\nPlease try again after sometime.`
+  String get SomethingWentWrongPleaseTryAgainAfterSometime {
+    return Intl.message(
+      'Something went wrong.\nPlease try again after sometime.',
+      name: 'SomethingWentWrongPleaseTryAgainAfterSometime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Something went wrong.\nPlease try again.`
+  String get SomethingWentWrongPleaseTryAgain {
+    return Intl.message(
+      'Something went wrong.\nPlease try again.',
+      name: 'SomethingWentWrongPleaseTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you want to delete any card, please swipe left against the selected card`
+  String get IfYouWantToDeleteAnyCardPleaseSwipeLeftAgainstTheSelectedCard {
+    return Intl.message(
+      'If you want to delete any card, please swipe left against the selected card',
+      name: 'IfYouWantToDeleteAnyCardPleaseSwipeLeftAgainstTheSelectedCard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter cvv`
+  String get EnterCvv {
+    return Intl.message(
+      'Enter cvv',
+      name: 'EnterCvv',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merchant id can not be empty.`
+  String get MerchantIdCanNotBeEmpty {
+    return Intl.message(
+      'Merchant id can not be empty.',
+      name: 'MerchantIdCanNotBeEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Api key can not be empty.`
+  String get ApiKeyCanNotBeEmpty {
+    return Intl.message(
+      'Api key can not be empty.',
+      name: 'ApiKeyCanNotBeEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session id can not be empty.`
+  String get SessionIdCanNotBeEmpty {
+    return Intl.message(
+      'Session id can not be empty.',
+      name: 'SessionIdCanNotBeEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Language should be en or ar.`
+  String get LanguageShouldBeEnOrAr {
+    return Intl.message(
+      'Language should be en or ar.',
+      name: 'LanguageShouldBeEnOrAr',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mobile Number`
+  String get MobileNumber {
+    return Intl.message(
+      'Mobile Number',
+      name: 'MobileNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Phone Number`
+  String get PhoneNumber {
+    return Intl.message(
+      'Phone Number',
+      name: 'PhoneNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send`
+  String get Send {
+    return Intl.message(
+      'Send',
+      name: 'Send',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send OTP`
+  String get SendOTP {
+    return Intl.message(
+      'Send OTP',
+      name: 'SendOTP',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter OTP`
+  String get EnterOTP {
+    return Intl.message(
+      'Enter OTP',
+      name: 'EnterOTP',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter Mobile Number`
+  String get EnterMobileNumber {
+    return Intl.message(
+      'Enter Mobile Number',
+      name: 'EnterMobileNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `OTP`
+  String get OTP {
+    return Intl.message(
+      'OTP',
+      name: 'OTP',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter OTP`
+  String get PleaseEnterOTP {
+    return Intl.message(
+      'Please enter OTP',
+      name: 'PleaseEnterOTP',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter mobile number`
+  String get PleaseEnterMobileNumber {
+    return Intl.message(
+      'Please enter mobile number',
+      name: 'PleaseEnterMobileNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter valid mobile number`
+  String get PleaseEnterValidMobileNumber {
+    return Intl.message(
+      'Please enter valid mobile number',
+      name: 'PleaseEnterValidMobileNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save STC Account`
+  String get SaveSTCAccount {
+    return Intl.message(
+      'Save STC Account',
+      name: 'SaveSTCAccount',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -10,8 +10,12 @@ Locale currentLocale = const Locale('en');
 String amount = '';
 String status = '';
 String currencyCode = '';
-String customerId = '';
+String? customerId = '';
 bool isLoading = false;
 bool isEnabled = true;
 // bool keyboard = false;
 final paymentScreenKey = GlobalKey<PaymentDetailsScreenState>();
+
+const String METHOD_TYPE_OTTU = '1';
+const String METHOD_TYPE_WEB = '2';
+const String METHOD_TYPE_STC = '3';

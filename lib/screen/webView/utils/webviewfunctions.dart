@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:ottu/Networkutils/networkUtils.dart';
+import 'package:ottu/consts/consts.dart';
 
 ///webview controllers
 class WebViewFunctions {
@@ -9,7 +10,7 @@ class WebViewFunctions {
     if (url.contains('mobile-sdk-redirect')) {
       await NetworkUtils.getPaymentDetails(
         sessionId,
-        methodType: '2',
+        methodType: METHOD_TYPE_WEB,
         context: context,
         apikey: NetworkUtils.token,
         openScreen: () {

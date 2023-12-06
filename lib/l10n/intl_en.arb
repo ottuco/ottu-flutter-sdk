@@ -37,5 +37,37 @@
     "fees": "Fees",
     "Subtotal": "Subtotal",
     "OrPayWithCard":"Or Pay With Card",
-    "Withsavedcardyoucanskipenteringcarddetailsinyournexttransaction":"With saved card you can skip entering card details in your next transaction"
+    "Withsavedcardyoucanskipenteringcarddetailsinyournexttransaction":"With saved card you can skip entering card details in your next transaction",
+
+    "WillBeApplied": "will be applied",
+    "Close": "Close",
+    "WithSavedCardYouCanSkipEnteringCardDetailsInYourNextTransactions": "With saved card you can skip entering card details in your next transactions",
+    "ThankYou": "Thank you!",
+    "CongratulationsYourTransferWasCompletedSuccessfully": "Congratulations your transfer was completed successfully",
+    "YourDeviceIsJailbreakPleaseTryToPayWithAnotherDevice": "Your device is jailbreak. Please try to pay with another device.",
+    "InvalidCvv": "Invalid cvv",
+    "InvalidCardNumber": "Invalid card number",
+    "InvalidName": "Invalid name",
+    "SomethingWentWrongPleaseTryAgainAfterSometimeOrCheckYourDeviceCompatibilityWithApplePay": "Something went wrong.\nPlease try again after sometime or check your device compatibility with apple pay.",
+    "SomethingWentWrongPleaseTryAgainAfterSometime": "Something went wrong.\nPlease try again after sometime.",
+    "SomethingWentWrongPleaseTryAgain": "Something went wrong.\nPlease try again.",
+    "IfYouWantToDeleteAnyCardPleaseSwipeLeftAgainstTheSelectedCard": "If you want to delete any card, please swipe left against the selected card",
+    "EnterCvv": "Enter cvv",
+    "MerchantIdCanNotBeEmpty": "Merchant id can not be empty.",
+    "ApiKeyCanNotBeEmpty": "Api key can not be empty.",
+    "SessionIdCanNotBeEmpty": "Session id can not be empty.",
+    "LanguageShouldBeEnOrAr": "Language should be en or ar.",
+    "MobileNumber": "Mobile Number",
+    "PhoneNumber": "Phone Number",
+    "Send": "Send",
+    "SendOTP": "Send OTP",
+    "EnterOTP": "Enter OTP",
+    "EnterMobileNumber": "Enter Mobile Number",
+    "OTP": "OTP",
+    "PleaseEnterOTP": "Please enter OTP",
+    "PleaseEnterMobileNumber": "Please enter mobile number",
+    "PleaseEnterValidMobileNumber": "Please enter valid mobile number",
+    "SaveSTCAccount": "Save STC Account"
+
+
 }

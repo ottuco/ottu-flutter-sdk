@@ -18,6 +18,7 @@ import 'package:ottu/screen/paymentScreen.dart';
 import 'package:ottu/screen/webView/webViewScreen.dart';
 import 'package:ottu/security/jailBreakDetection.dart';
 import 'package:ottu/widget/Toast.dart';
+import 'package:ottu/screen/mobile_popup_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../security/Encryption.dart';
@@ -54,7 +55,7 @@ class NetworkUtils {
       if (isSecure) return http.Response('', 403);
     }
 
-    if (methodType == '1') paymentDelegates = paymentDelegate;
+    if (methodType != METHOD_TYPE_WEB) paymentDelegates = paymentDelegate;
 
     if (sdkLanguage == 'en') {
       currentLocale = const Locale('en');
@@ -86,7 +87,7 @@ class NetworkUtils {
         payment = Payment.fromJson(res);
         sessionId = payment.sessionId.toString();
 
-        if (methodType == '1') {
+        if (methodType == METHOD_TYPE_OTTU) {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (ctx) => PaymentScreen(
@@ -95,6 +96,9 @@ class NetworkUtils {
               ),
             ),
           );
+        } else if(methodType == METHOD_TYPE_STC) {
+          PaymentMethod? stcPaymentMethod = payment.paymentMethods?.firstWhere((element) => element.flow == "stc_pay");
+          if(stcPaymentMethod != null) showMobileOTPPopup(context, stcPaymentMethod);
         } else {
           openScreen();
         }

@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ottu/Networkutils/networkUtils.dart';
+import 'package:ottu/consts/consts.dart';
 import 'package:ottu/models/fetchpaymenttransaction.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import '../generated/l10n.dart';
+import 'package:ottu/consts/colors.dart';
+import 'package:ottu/consts/consts.dart';
+import 'package:get/get.dart';
 
 class MobilePopup extends StatefulWidget {
   PaymentMethod? paymentMethod;
@@ -42,107 +49,130 @@ class _MobilePopupState extends State<MobilePopup> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(showOtpField ? "Enter OTP" : "Enter Mobile Number"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!showOtpField)
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  mobileNumber = value;
-                  showPhoneNumberError = false; // Reset the error message
-                });
-              },
-              enabled: !isLoading && !showOtpField,
-              keyboardType: TextInputType.phone,
-              maxLength: 12,
-              decoration: const InputDecoration(labelText: "Mobile Number"),
-            ),
-
-          if (!showOtpField && widget.paymentMethod?.cansavecard == true)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * .05,
-                child: Checkbox(
-                  activeColor: Colors.black,
-                    value: isSaveCard,
-                    visualDensity: VisualDensity.compact,
-                    onChanged: (value) {
-                      setState(() {
-                        isSaveCard = !isSaveCard;
-                      });
-                    }
-                ),
-              ),
-              SizedBox(width: 7,),
-              Text('Click To Save Your Card')
-            ],
-          ),
-          if (showPhoneNumberErrorMessage.isNotEmpty)
-            Text(
-              showPhoneNumberErrorMessage,
-              style: const TextStyle(color: Colors.red),
-            ),
-          if (showOtpField)
-            TextField(
-              controller: otpController,
-              onChanged: (value) {
-                setState(() {
-                  otp = value;
-                  showOtpError = false; // Reset the error message
-                });
-              },
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Enter OTP"),
-            ),
-          if (showOtpError)
-            const Text(
-              "Something went wrong",
-              style: TextStyle(color: Colors.red),
-            ),
-          if (isLoading) const CircularProgressIndicator(),
-        ],
+    return MaterialApp(
+      theme: ThemeData(
+        primaryColor: primaryColor,
+        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: primaryColor),
       ),
-      actions: [
-        TextButton(
-          onPressed: isLoading || mobileNumber.isEmpty || mobileNumber.length < 8 || mobileNumber.length > 15 || (showOtpField && otp.isEmpty)
-              ? null
-              : () async {
-                  setState(() => isLoading = true);
-                  if (!showOtpField) {
-                    final phoneNumberResponse = await submitPhoneNumberAndHandleResponse(
-                      context,
-                      NetworkUtils.payment.sessionId.toString(),
-                      mobileNumber,
-
-                    );
-                    setState(() {
-                      showOtpField = phoneNumberResponse == 'sent';
-                      showPhoneNumberErrorMessage = showOtpField ? '' : phoneNumberResponse;
-                    });
-                  } else {
-                    final otpResponse = await submitOTP(context, NetworkUtils.payment.sessionId.toString(), otp);
-
-                    setState(() {
-                      showOtpError = otpResponse != 'Success';
-                    });
-                  }
-                  setState(() => isLoading = false);
+      debugShowCheckedModeBanner: false,
+      home: Builder(builder: (context) => AlertDialog(
+        title: Text(showOtpField ? S.of(context).EnterOTP : S.of(context).EnterMobileNumber),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!showOtpField)
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    mobileNumber = value;
+                    showPhoneNumberError = false; // Reset the error message
+                  });
                 },
-          child: const Text("Send"),
+                enabled: !isLoading && !showOtpField,
+                keyboardType: TextInputType.phone,
+                maxLength: 12,
+                decoration: InputDecoration(labelText: S.of(context).MobileNumber),
+              ),
+
+            if ((customerId ?? '').isNotEmpty && !showOtpField && widget.paymentMethod?.cansavecard == true)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * .05,
+                    child: Checkbox(
+                        activeColor: Colors.black,
+                        value: isSaveCard,
+                        visualDensity: VisualDensity.compact,
+                        onChanged: (value) {
+                          setState(() {
+                            isSaveCard = !isSaveCard;
+                          });
+                        }
+                    ),
+                  ),
+                  SizedBox(width: 7,),
+                  Text(S.of(context).ClickToSaveYourCard)
+                ],
+              ),
+            if (showPhoneNumberErrorMessage.isNotEmpty)
+              Text(
+                showPhoneNumberErrorMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
+            if (showOtpField)
+              TextField(
+                controller: otpController,
+                onChanged: (value) {
+                  setState(() {
+                    otp = value;
+                    showOtpError = false; // Reset the error message
+                  });
+                },
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: S.of(context).EnterOTP),
+              ),
+            if (showOtpError)
+              Text(
+                S.of(context).SomethingWentWrongPleaseTryAgain,
+                style: TextStyle(color: Colors.red),
+              ),
+            if (isLoading) const CircularProgressIndicator(),
+          ],
         ),
-        TextButton(
-          onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text("Close"),
-        ),
+        actions: [
+          TextButton(
+            onPressed: isLoading || mobileNumber.isEmpty || mobileNumber.length < 8 || mobileNumber.length > 15 || (showOtpField && otp.isEmpty)
+                ? null
+                : () async {
+              setState(() => isLoading = true);
+              if (!showOtpField) {
+                final phoneNumberResponse = await submitPhoneNumberAndHandleResponse(
+                  context,
+                  NetworkUtils.payment.sessionId.toString(),
+                  mobileNumber,
+
+                );
+                setState(() {
+                  showOtpField = phoneNumberResponse == 'sent';
+                  showPhoneNumberErrorMessage = showOtpField ? '' : phoneNumberResponse;
+                });
+              } else {
+                final otpResponse = await submitOTP(context, NetworkUtils.payment.sessionId.toString(), otp);
+
+                setState(() {
+                  showOtpError = otpResponse != 'Success';
+                });
+              }
+              setState(() => isLoading = false);
+            },
+            child: Text(S.of(context).SendOTP),
+          ),
+          TextButton(
+            onPressed: isLoading ? null : () {
+              // Navigator.of(context).pop();
+              // Future.delayed(Duration(milliseconds: 1000), () {
+                Get.back();
+              // });
+            },
+            child: Text(S.of(context).Close),
+          ),
+        ],
+      ),),
+      locale: currentLocale,
+      localizationsDelegates: const [
+        //localedelegates
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
+      //sdklocale
+      supportedLocales: S.delegate.supportedLocales,
     );
+
   }
 
   Future<String> submitPhoneNumberAndHandleResponse(BuildContext context, String sessionId, String phoneNumber) async {
@@ -153,6 +183,7 @@ class _MobilePopupState extends State<MobilePopup> {
   Future<String> submitPhoneNumber(BuildContext context, String sessionId, String phoneNumber) async {
     const merchantId = "";
     String apiUrl = widget.paymentMethod?.submitUrl ?? '';
+    // const apiUrl = "https://$merchantId/b/checkout/api/sdk/v1/stcpay/submit/";
     final headers = {
       "Content-Type": "application/json",
       "Authorization": 'Api-Key ${NetworkUtils.token}',
@@ -185,7 +216,12 @@ class _MobilePopupState extends State<MobilePopup> {
   }
 
   Future<String> submitOTP(BuildContext context, String sessionId, String otp) async {
+    // const merchantId = "staging4.ottu.dev";
+    //const apiKey = "kZia0dfY.vEWS0cUV5gWV1JDzIvzDfSxKLUh4qAa3";
+    const merchantId = "alpha.ottu.net";
     String apiUrl = widget.paymentMethod?.paymentUrl ?? '';
+    // const apiUrl = "https://$merchantId/b/checkout/api/sdk/v1/stcpay/pay/";
+    // final headers = {'Content-Type': 'application/json'};
     final headers = {
       "Content-Type": "application/json",
       "Authorization": 'Api-Key ${NetworkUtils.token}',
@@ -210,6 +246,20 @@ class _MobilePopupState extends State<MobilePopup> {
       } else {
         return 'Other Error';
       }
+
+      // var redirectResponse = NetworkUtils.payment;
+      // Navigator.of(context).pop();
+      // if (redirectResponse.state == 'paid') {
+      //   NetworkUtils.paymentDelegates!.successCallback(jsonEncode(redirectResponse.responseConfig!.toJson()));
+      //   Navigator.of(context).pop();
+      //   Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
+      //   //Dialogs().showSuccessDialog(context, currencyCode);
+      // } else {
+      //   NetworkUtils.paymentDelegates!.cancelCallback(jsonEncode(redirectResponse.responseConfig!.toJson()));
+      //   Navigator.of(context).pop();
+      //   Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
+      //   //Dialogs().showFailDialog(context);
+      // }
 
     } catch (error) {
       return 'Exception Error';
@@ -257,4 +307,6 @@ void showMobileOTPPopup(BuildContext context, PaymentMethod paymentMethod, {bool
       return MobilePopup(paymentMethod);
     },
   );
+
+  
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:ottu/Networkutils/networkUtils.dart';
 import 'package:ottu/paymentDelegate/paymentDelegate.dart';
+import 'package:ottu/consts/consts.dart';
 
 /// ottu payment sdk
 class Ottu {
@@ -14,6 +15,7 @@ class Ottu {
     PaymentDelegate paymentDelegate, {
     /// It is optional. It takes default language en.
     String? lang,
+    String methodType = METHOD_TYPE_OTTU,
   }) async {
     try {
       await NetworkUtils.getPaymentDetails(
@@ -24,6 +26,7 @@ class Ottu {
         sdkLanguage: lang!,
         apikey: apiKey,
         merchantId: merchantid,
+        methodType: methodType,
       );
     } catch (e) {
       throw Exception(e);
