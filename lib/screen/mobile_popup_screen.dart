@@ -215,7 +215,6 @@ class _MobilePopupState extends State<MobilePopup> {
 
   Future<String> submitOTP(BuildContext context, String sessionId, String otp) async {
     String apiUrl = widget.paymentMethod?.paymentUrl ?? '';
-    // final headers = {'Content-Type': 'application/json'};
     final headers = {
       "Content-Type": "application/json",
       "Authorization": 'Api-Key ${NetworkUtils.token}',
@@ -240,20 +239,6 @@ class _MobilePopupState extends State<MobilePopup> {
       } else {
         return 'Other Error';
       }
-
-      // var redirectResponse = NetworkUtils.payment;
-      // Navigator.of(context).pop();
-      // if (redirectResponse.state == 'paid') {
-      //   NetworkUtils.paymentDelegates!.successCallback(jsonEncode(redirectResponse.responseConfig!.toJson()));
-      //   Navigator.of(context).pop();
-      //   Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
-      //   //Dialogs().showSuccessDialog(context, currencyCode);
-      // } else {
-      //   NetworkUtils.paymentDelegates!.cancelCallback(jsonEncode(redirectResponse.responseConfig!.toJson()));
-      //   Navigator.of(context).pop();
-      //   Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
-      //   //Dialogs().showFailDialog(context);
-      // }
 
     } catch (error) {
       return 'Exception Error';
