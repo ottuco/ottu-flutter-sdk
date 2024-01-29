@@ -18,7 +18,6 @@ import '../widget/cardTile.dart';
 import '../widget/dialogs.dart';
 import '../widget/savedCard.dart';
 import 'package:ottu/screen/webView/webViewScreen.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 final paymentCard = PaymentCard();
 

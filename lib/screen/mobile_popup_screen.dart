@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ottu/Networkutils/networkUtils.dart';
 import 'package:ottu/consts/consts.dart';
 import 'package:ottu/models/fetchpaymenttransaction.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import '../generated/l10n.dart';
 import 'package:ottu/consts/colors.dart';
-import 'package:ottu/consts/consts.dart';
-import 'package:get/get.dart';
 
 class MobilePopup extends StatefulWidget {
   PaymentMethod? paymentMethod;
@@ -152,9 +149,9 @@ class _MobilePopupState extends State<MobilePopup> {
           ),
           TextButton(
             onPressed: isLoading ? null : () {
-              // Navigator.of(context).pop();
+              Navigator.of(context).pop();
               // Future.delayed(Duration(milliseconds: 1000), () {
-                Get.back();
+              //   Get.back();
               // });
             },
             child: Text(S.of(context).Close),

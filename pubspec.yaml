@@ -1,37 +1,38 @@
 name: ottu
 description: A new flutter payment sdk
-version: 0.1.5
-homepage: https://github.com/sdkpayment/Flutter-SDK.git
+version: 0.1.6
+homepage: https://github.com/ottuco/ottu-flutter-sdk
 
 environment:
   sdk: '>=2.18.5 <3.0.0'
-  flutter: ">=2.5.0"
+  flutter: ">=2.8.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
+  plugin_platform_interface: ^2.1.8
   flutter_localizations:
     sdk: flutter
-  intl: ^0.18.0
-  http: ^0.13.5
-  webview_flutter: ^3.0.1
-  web_socket_channel: ^2.1.0
+  intl: ^0.18.1
+  http: ^1.2.0
+  webview_flutter: ^3.0.4
+  web_socket_channel: ^2.4.0
   flutter_windowmanager: ^0.2.0
-  flutter_jailbreak_detection: ^1.8.0
-  shimmer: ^2.0.0
-  flutter_screenutil: ^5.8.1
-  encrypt: ^5.0.1
-  basic_utils: ^5.4.2
-  fluttertoast: ^8.1.2
-  pem: ^2.0.1
-  flutter_svg: ^0.22.0
+  flutter_jailbreak_detection: ^1.10.0
+  shimmer: ^3.0.0
+  flutter_screenutil: ^5.9.0
+  encrypt: ^5.0.3
+  basic_utils: ^5.7.0
+  fluttertoast: ^8.2.4
+  pem: ^2.0.4
+  flutter_svg: ^2.0.9
+  flutter_lints: ^3.0.1
 
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^2.0.0
+#dev_dependencies:
+#  flutter_test:
+#    sdk: flutter
+#  flutter_lints: ^2.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

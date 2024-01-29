@@ -19,7 +19,6 @@ import 'package:ottu/screen/webView/webViewScreen.dart';
 import 'package:ottu/security/jailBreakDetection.dart';
 import 'package:ottu/widget/Toast.dart';
 import 'package:ottu/screen/mobile_popup_screen.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../security/Encryption.dart';
 
@@ -39,7 +38,7 @@ class NetworkUtils {
     BuildContext? context,
     PaymentDelegate? paymentDelegate,
     String sdkLanguage = 'en',
-    String methodType = '1',
+    String methodType = METHOD_TYPE_OTTU,
     String apikey = '',
     String merchantId = '',
   }) async {
