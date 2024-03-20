@@ -31,18 +31,22 @@ class WebViewWithSocketScreenFunction {
   static navigate(String response, BuildContext context) {
     var res = _decoder.convert(response);
 
+    Navigator.of(context).pop();
     if (res['status'] == 'canceled') {
       NetworkUtils.paymentDelegates!.cancelCallback(jsonEncode(res));
       Navigator.of(context).pop();
-      Navigator.popUntil(
-          context, (Route<dynamic> predicate) => predicate.isFirst);
+      // Navigator.popUntil(
+      //     context, (Route<dynamic> predicate) => predicate.isFirst);
       // Dialogs().showFailDialog(context);
     } else if (res['status'] == 'success') {
       NetworkUtils.paymentDelegates!.successCallback(jsonEncode(res));
       Navigator.of(context).pop();
-      Navigator.popUntil(
-          context, (Route<dynamic> predicate) => predicate.isFirst);
+      // Navigator.popUntil(
+      //     context, (Route<dynamic> predicate) => predicate.isFirst);
       // Dialogs().showSuccessDialog(context, currencyCode);
+    } else {
+      NetworkUtils.paymentDelegates!.errorCallback(jsonEncode(res));
+      Navigator.of(context).pop();
     }
   }
 }

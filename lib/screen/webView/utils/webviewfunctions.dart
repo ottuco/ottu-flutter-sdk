@@ -15,16 +15,24 @@ class WebViewFunctions {
         apikey: NetworkUtils.token,
         openScreen: () {
           var redirectResponse = NetworkUtils.payment;
-          Navigator.of(context).pop();
-          if (redirectResponse.state == 'paid') {
+          // Navigator.of(context).pop();
+          //
+          Navigator.of(context, rootNavigator: true).pop();
+          // if (redirectResponse.state == 'paid') {
+          if (redirectResponse.responseConfig?.status == 'success') {
             NetworkUtils.paymentDelegates!.successCallback(jsonEncode(redirectResponse.responseConfig!.toJson()));
             Navigator.of(context).pop();
-            Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
+            // Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
             //Dialogs().showSuccessDialog(context, currencyCode);
-          } else {
+          } else if (redirectResponse.responseConfig?.status == 'cancelled') {
             NetworkUtils.paymentDelegates!.cancelCallback(jsonEncode(redirectResponse.responseConfig!.toJson()));
             Navigator.of(context).pop();
-            Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
+            // Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
+            //Dialogs().showSuccessDialog(context, currencyCode);
+          } else {
+            NetworkUtils.paymentDelegates!.errorCallback(jsonEncode(redirectResponse.responseConfig!.toJson()));
+            Navigator.of(context).pop();
+            // Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
             //Dialogs().showFailDialog(context);
           }
         },

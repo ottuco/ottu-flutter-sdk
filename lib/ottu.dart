@@ -15,7 +15,7 @@ class Ottu {
     PaymentDelegate paymentDelegate, {
     /// It is optional. It takes default language en.
     String? lang,
-    String methodType = METHOD_TYPE_OTTU,
+    bool isStcPay = false,
   }) async {
     try {
       await NetworkUtils.getPaymentDetails(
@@ -26,7 +26,7 @@ class Ottu {
         sdkLanguage: lang!,
         apikey: apiKey,
         merchantId: merchantid,
-        methodType: methodType,
+        methodType: isStcPay ? METHOD_TYPE_STC : METHOD_TYPE_OTTU,
       );
     } catch (e) {
       throw Exception(e);

@@ -97,7 +97,7 @@ class NetworkUtils {
           );
         } else if(methodType == METHOD_TYPE_STC) {
           PaymentMethod? stcPaymentMethod = payment.paymentMethods?.firstWhere((element) => element.flow == "stc_pay");
-          if(stcPaymentMethod != null) showMobileOTPPopup(context, stcPaymentMethod);
+          if(stcPaymentMethod != null) showMobileOTPPopup(context, stcPaymentMethod, isDirect: true);
         } else {
           openScreen();
         }

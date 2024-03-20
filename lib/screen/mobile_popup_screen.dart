@@ -10,7 +10,8 @@ import 'package:ottu/consts/colors.dart';
 
 class MobilePopup extends StatefulWidget {
   PaymentMethod? paymentMethod;
-  MobilePopup(this.paymentMethod, {Key? key}) : super(key: key);
+  bool isOpenedDirect = false;
+  MobilePopup(this.paymentMethod, {Key? key, this.isOpenedDirect = false}) : super(key: key);
 
   @override
   _MobilePopupState createState() => _MobilePopupState();
@@ -137,7 +138,7 @@ class _MobilePopupState extends State<MobilePopup> {
                   showPhoneNumberErrorMessage = showOtpField ? '' : phoneNumberResponse;
                 });
               } else {
-                final otpResponse = await submitOTP(context, NetworkUtils.payment.sessionId.toString(), otp);
+                final otpResponse = await submitOTP(context, NetworkUtils.payment.sessionId.toString(), otp, isOpenedDirect: widget.isOpenedDirect);
 
                 setState(() {
                   showOtpError = otpResponse != 'Success';
@@ -149,9 +150,11 @@ class _MobilePopupState extends State<MobilePopup> {
           ),
           TextButton(
             onPressed: isLoading ? null : () {
-              Navigator.of(context).pop();
-              // Future.delayed(Duration(milliseconds: 1000), () {
-              //   Get.back();
+              Navigator.of(context, rootNavigator: true).pop();
+
+              // Navigator.of(context).pop();
+              // Future.delayed(Duration(milliseconds: 5000), () {
+              //   Navigator.of(context).pop();
               // });
             },
             child: Text(S.of(context).Close),
@@ -210,7 +213,7 @@ class _MobilePopupState extends State<MobilePopup> {
     }
   }
 
-  Future<String> submitOTP(BuildContext context, String sessionId, String otp) async {
+  Future<String> submitOTP(BuildContext context, String sessionId, String otp, {bool isOpenedDirect = false}) async {
     String apiUrl = widget.paymentMethod?.paymentUrl ?? '';
     final headers = {
       "Content-Type": "application/json",
@@ -220,14 +223,16 @@ class _MobilePopupState extends State<MobilePopup> {
 
     try {
       final response = await http.post(Uri.parse(apiUrl), body: body, headers: headers);
+
       if (response.statusCode == 200) {
 
-        NetworkUtils.paymentDelegates!.successCallback(response.body);
-        Navigator.of(context).pop();
-        Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
+        // NetworkUtils.paymentDelegates!.successCallback(response.body);
+
+
+        // Navigator.popUntil(context, (Route<dynamic> predicate) => predicate.isFirst);
 
         final responseData = jsonDecode(response.body);
-        return handleResponse(responseData);
+        return handleResponse(responseData, isOpenedDirect);
       } else if (response.statusCode == 401) {
         final errorData = jsonDecode(response.body);
         //final errorDetail = errorData['detail'];
@@ -242,22 +247,30 @@ class _MobilePopupState extends State<MobilePopup> {
     }
   }
 
-  String handleResponse(Map<String, dynamic> responseData) {
+  String handleResponse(Map<String, dynamic> responseData, bool isOpenedDirect) {
     final paymentGatewayInfo = responseData['payment_gateway_info'];
     final status = responseData['status'];
     final errorMessage = responseData['message'];
 
+    int count = 0;
+    if(isOpenedDirect) count = 1;
+    Navigator.of(context).popUntil((_) => count++ >= 2);
+
     switch (status) {
       case 'success':
+        NetworkUtils.paymentDelegates!.successCallback(jsonEncode(responseData));
         // Handle success case here
         return 'Success'; // You can modify this return value as needed
       case 'canceled':
+        NetworkUtils.paymentDelegates!.cancelCallback(jsonEncode(responseData));
         // Handle cancellation case here
         return 'Cancelled'; // You can modify this return value as needed
       case 'error':
+        NetworkUtils.paymentDelegates!.errorCallback(jsonEncode(responseData));
         // Handle error case here
         return 'Error: $errorMessage'; // You can modify this return value as needed
       default:
+        NetworkUtils.paymentDelegates!.errorCallback(jsonEncode(responseData));
         // Handle other cases if needed
         return 'Unknown Status'; // You can modify this return value as needed
     }
@@ -275,14 +288,16 @@ class _MobilePopupState extends State<MobilePopup> {
   }
 }
 
-void showMobileOTPPopup(BuildContext context, PaymentMethod paymentMethod, {bool canSaveCard = false}) {
+void showMobileOTPPopup(BuildContext context, PaymentMethod paymentMethod, {bool canSaveCard = false, bool isDirect = false}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      return MobilePopup(paymentMethod);
+      return MobilePopup(paymentMethod, isOpenedDirect: isDirect,);
     },
   );
+
+
 
   
 }
